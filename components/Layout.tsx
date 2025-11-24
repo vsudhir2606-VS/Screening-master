@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { ShieldCheck, Users, AlertOctagon, MessageSquare, Globe, CheckSquare, Search, Sparkles, Settings, LogOut, Save } from 'lucide-react';
+import { ShieldCheck, Users, AlertOctagon, MessageSquare, Globe, CheckSquare, Search, Sparkles, Settings, LogOut, Download } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useData } from '../context/DataContext';
 import { exportToExcel } from '../services/excelService';
@@ -122,10 +122,10 @@ const Layout: React.FC = () => {
                <button
                   onClick={handleQuickSave}
                   className="p-2.5 rounded-lg text-emerald-400 hover:bg-emerald-500/10 hover:text-emerald-300 transition-all flex items-center gap-2"
-                  title="Save Data to Disk"
+                  title="Download a backup Excel file (Auto-save is always active)"
                >
-                 <Save className="w-5 h-5" />
-                 <span className="text-sm font-bold hidden lg:inline">Save Data</span>
+                 <Download className="w-5 h-5" />
+                 <span className="text-sm font-bold hidden lg:inline">Download Backup</span>
                </button>
 
                <NavLink to="/settings" className={({ isActive }) =>
