@@ -1,49 +1,21 @@
 
 import React, { useState } from 'react';
 import { useData } from '../context/DataContext';
-import { DataTable } from '../components/DataTable';
 import { readExcelFile, readBackupFile, exportToExcel } from '../services/excelService';
 import { dbService } from '../services/storage';
 import { ZymeEntry } from '../types';
-import { Upload, Download, Trash2, Database, RefreshCw, Plus, UserPlus, AlertTriangle } from 'lucide-react';
-import EntityFormModal from '../components/EntityFormModal';
+import { Upload, Download, AlertTriangle, X } from 'lucide-react';
 
 const Settings: React.FC = () => {
   const { 
-    zymeData, bulkImportZyme, deleteZyme, addZyme,
+    zymeData, bulkImportZyme, addZyme,
     customers, rpls, generalComments, aprvComments,
     bulkImportCustomers, bulkImportRPL, bulkImportGeneralComments, bulkImportAprvComments
   } = useData();
   
-  const [activeTab, setActiveTab] = useState<'zyme' | 'backup'>('zyme');
-  const [isZymeModalOpen, setIsZymeModalOpen] = useState(false);
-
-  const handleZymeUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      try {
-        const data = await readExcelFile<ZymeEntry>(e.target.files[0]);
-        // Basic check
-        const validData = data.filter(d => d.name);
-        if (validData.length > 0) {
-            bulkImportZyme(validData);
-            alert(`Imported ${validData.length} Zyme records.`);
-        }
-      } catch (error) {
-        console.error(error);
-        alert('Failed to read Excel file.');
-      }
-      e.target.value = '';
-    }
-  };
-
-  const handleAddZyme = (data: any) => {
-    addZyme({
-        id: Math.random().toString(36).substr(2, 9),
-        name: data.name,
-        address: data.address, // Maps to 'Comment' in Zyme UI
-        type: data.type        // Maps to 'Date' in Zyme UI
-    });
-  };
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [resetPassword, setResetPassword] = useState('');
+  const [resetError, setResetError] = useState('');
 
   const handleBackup = () => {
     const date = new Date().toISOString().split('T')[0];
@@ -92,11 +64,25 @@ const Settings: React.FC = () => {
     }
   };
 
-  const handleResetApp = async () => {
-    if(window.confirm("DANGER: This will delete ALL data (Customers, RPL, Zyme, Comments). This cannot be undone. Are you sure?")) {
-        await dbService.clear();
-        localStorage.clear();
-        window.location.reload();
+  const handleResetClick = () => {
+    setIsResetModalOpen(true);
+    setResetPassword('');
+    setResetError('');
+  };
+
+  const confirmReset = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (resetPassword === 'hub123') {
+        try {
+            await dbService.clear();
+            localStorage.clear();
+            window.location.reload();
+        } catch (error) {
+            console.error("Reset failed", error);
+            setResetError("Failed to reset database.");
+        }
+    } else {
+        setResetError('Incorrect Password.');
     }
   };
 
@@ -180,7 +166,7 @@ const Settings: React.FC = () => {
                 <p>This will permanently delete all customers, RPLs, and comments, resetting the application to its initial state. This action cannot be undone.</p>
             </div>
             <button 
-                onClick={handleResetApp}
+                onClick={handleResetClick}
                 className="px-4 py-2 bg-red-600 text-white text-sm font-bold rounded-md hover:bg-red-700 shadow-sm flex items-center gap-2 whitespace-nowrap"
             >
                 <AlertTriangle className="w-4 h-4" />
@@ -188,6 +174,58 @@ const Settings: React.FC = () => {
             </button>
         </div>
       </div>
+
+      {/* Reset Password Modal */}
+      {isResetModalOpen && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in border border-red-200">
+                <div className="bg-red-50 px-6 py-4 border-b border-red-100 flex justify-between items-center">
+                    <h3 className="text-lg font-bold text-red-800 flex items-center gap-2">
+                        <AlertTriangle className="w-5 h-5" />
+                        Confirm Factory Reset
+                    </h3>
+                    <button onClick={() => setIsResetModalOpen(false)} className="text-red-400 hover:text-red-600 p-1 rounded-full hover:bg-red-100 transition-colors">
+                        <X className="w-5 h-5" />
+                    </button>
+                </div>
+                
+                <form onSubmit={confirmReset} className="p-6 space-y-4">
+                    <p className="text-sm text-slate-600">
+                        This action will <strong>permanently delete all data</strong>. 
+                        Please enter the administrator password to confirm.
+                    </p>
+                    
+                    <div>
+                        <input 
+                            type="password" 
+                            value={resetPassword}
+                            onChange={(e) => setResetPassword(e.target.value)}
+                            placeholder="Enter admin password"
+                            className="w-full p-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:outline-none transition-shadow"
+                            autoFocus
+                        />
+                        {resetError && <p className="text-red-600 text-sm mt-2 font-medium flex items-center gap-1"><AlertTriangle className="w-3 h-3" /> {resetError}</p>}
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-2">
+                        <button 
+                            type="button" 
+                            onClick={() => setIsResetModalOpen(false)}
+                            className="px-4 py-2 text-slate-600 font-medium hover:bg-slate-100 rounded-lg transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            type="submit"
+                            className="px-4 py-2 bg-red-600 text-white font-bold rounded-lg hover:bg-red-700 shadow-sm hover:shadow transition-all"
+                        >
+                            Confirm Reset
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+      )}
     </div>
   );
 };
