@@ -15,7 +15,7 @@ export const searchEntity = async (name: string, address: string) => {
     Format the response clearly with Markdown. Make the website link bold or a clickable link if possible.`;
 
     const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
+      model: 'gemini-3-flash-preview',
       contents: prompt,
       config: {
         tools: [{ googleSearch: {} }],

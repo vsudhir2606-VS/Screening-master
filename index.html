@@ -22,16 +22,12 @@
     "react-markdown": "https://aistudiocdn.com/react-markdown@^10.1.0"
   }
 }
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
-  const firebaseConfig = {
-    apiKey: "AIzaSyAMN6wUVPtSU8cD_Y9wQq1GFKeHRPysVJg",
-    authDomain: "rel-track.firebaseapp.com",
-    databaseURL: "https://rel-track-default-rtdb.firebaseio.com",
-    projectId: "rel-track",
-    storageBucket: "rel-track.firebasestorage.app",
-    messagingSenderId: "225194319588",
-    appId: "1:225194319588:web:134f37de32b91bd2aad6f1"
-  };
-  const app = initializeApp(firebaseConfig);
 </script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-slate-50 text-slate-900">
+    <div id="root"></div>
+    <script type="module" src="./index.tsx"></script>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
